@@ -4,7 +4,7 @@ from django.contrib.contenttypes.fields import GenericForeignKey
 from django.utils import timezone
 from django.conf import settings
 
-from music_shop.music_shop.utils import upload_function
+from utils import upload_function
 
 
 class MediaType(models.Model):
@@ -64,7 +64,7 @@ class Artist(models.Model):
 
 class Album(models.Model):
 
-    artist = models.ForeignKey(Artist, on_delete=models.CASCADE, verbouse_name='Исполнитель')
+    artist = models.ForeignKey(Artist, on_delete=models.CASCADE, verbose_name='Исполнитель')
     name = models.CharField(max_length=250, verbose_name='Название')
     media_type = models.ForeignKey(MediaType, verbose_name='Носитель', on_delete=models.CASCADE)
     songs_list = models.TextField(verbose_name='Трэк-лист')
@@ -173,7 +173,7 @@ class Order(models.Model):
 
 class Customer(models.Model):
 
-    user = models.OneToOneField(settings.AUTH_MODEL_USER, verbose_name='Пользователь', on_delete=models.CASCADE)
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, verbose_name='Пользователь', on_delete=models.CASCADE)
     is_active = models.BooleanField(default=True, verbose_name='Активный')
     customer_orders = models.ManyToManyField(
         Order, blank=True, verbose_name='Заказы покупателя', related_name='related_customer'
@@ -203,3 +203,19 @@ class Notification(models.Model):
     class Meta:
         verbose_name = 'Уведомление'
         verbose_name_plural = 'Уведомления'
+
+
+class ImageGallery(models.Model):
+
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    object_id = models.PositiveIntegerField()
+    content_object = GenericForeignKey('content_type', 'object_id')
+    image = models.ImageField(upload_to=upload_function)
+    use_in_slider = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"Изображение для {self.content_object}"
+
+    class Meta:
+        verbose_name = 'Галерея изображений'
+        verbose_name_plural = verbose_name

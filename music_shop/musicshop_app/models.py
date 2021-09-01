@@ -3,11 +3,12 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.utils import timezone
 from django.conf import settings
-
+from django.utils.safestring import mark_safe
 from utils import upload_function
 
 
 class MediaType(models.Model):
+    # Тип носителя
 
     name = models.CharField(max_length=100, verbose_name='Название медианоителя')
 
@@ -20,9 +21,10 @@ class MediaType(models.Model):
 
 
 class Member(models.Model):
+    # Исполнитель
 
     name = models.CharField(max_length=100, verbose_name='Имя')
-    slug = models.SlugField
+    slug = models.SlugField()
     image = models.ImageField(upload_to=upload_function, null=True, blank=True)
 
     def __str__(self):
@@ -34,9 +36,10 @@ class Member(models.Model):
 
 
 class Genre(models.Model):
+    # Жанр
 
     name = models.CharField(max_length=50, verbose_name='Музыкальный жанр')
-    slug = models.SlugField
+    slug = models.SlugField()
 
     def __str__(self):
         return self.name
@@ -47,11 +50,12 @@ class Genre(models.Model):
 
 
 class Artist(models.Model):
+    # Исполнитель
 
     name = models.CharField(max_length=100, verbose_name='Исполнитель/группа')
     genre = models.ForeignKey(Genre, on_delete=models.CASCADE)
     members = models.ManyToManyField(Member, verbose_name='Участник', related_name='artist')
-    slug = models.SlugField
+    slug = models.SlugField()
     image = models.ImageField(upload_to=upload_function, null=True, blank=True)
 
     def __str__(self):
@@ -63,13 +67,14 @@ class Artist(models.Model):
 
 
 class Album(models.Model):
+    # Альбом
 
     artist = models.ForeignKey(Artist, on_delete=models.CASCADE, verbose_name='Исполнитель')
     name = models.CharField(max_length=250, verbose_name='Название')
     media_type = models.ForeignKey(MediaType, verbose_name='Носитель', on_delete=models.CASCADE)
     songs_list = models.TextField(verbose_name='Трэк-лист')
     release_date = models.DateField(verbose_name='Дата релиза')
-    slug = models.SlugField
+    slug = models.SlugField()
     description = models.TextField(verbose_name='Описание', default='Описание появится позже')
     stock = models.IntegerField(verbose_name='Наличие на складе', default=1)
     price = models.DecimalField(verbose_name='Цена', max_digits=9, decimal_places=2)
@@ -89,6 +94,7 @@ class Album(models.Model):
 
 
 class CartProduct(models.Model):
+    # Продук корзины
 
     user = models.ForeignKey('Customer', verbose_name='Покупатель', on_delete=models.CASCADE)
     cart = models.ForeignKey('Cart', verbose_name='Корзина', on_delete=models.CASCADE)
@@ -111,12 +117,13 @@ class CartProduct(models.Model):
 
 
 class Cart (models.Model):
+    # Корзина
 
     owner = models.ForeignKey('Customer', verbose_name='Покупатель', on_delete=models.CASCADE)
     products = models.ManyToManyField(
-        CartProduct, blank=True, null=True, verbose_name='Продукты длякорзины', related_name='related_cart'
+        CartProduct, blank=True, verbose_name='Продукты длякорзины', related_name='related_cart'
     )
-    total_product = models.IntegerField(verbose_name='Общие кол-во товара',default=0)
+    total_product = models.IntegerField(verbose_name='Общие кол-во товара', default=0)
     final_price = models.DecimalField(verbose_name='Общее кол-во товара', max_digits=9, decimal_places=2)
     in_order = models.BooleanField(default=False)
     for_anonymous_owner = models.BooleanField(default=False)
@@ -130,6 +137,7 @@ class Cart (models.Model):
 
 
 class Order(models.Model):
+    # Заказ
 
     STATUS_NEW = 'new'
     STATUS_IN_PROGRESS = 'in_progress'
@@ -172,6 +180,7 @@ class Order(models.Model):
 
 
 class Customer(models.Model):
+    # Покупатель
 
     user = models.OneToOneField(settings.AUTH_USER_MODEL, verbose_name='Пользователь', on_delete=models.CASCADE)
     is_active = models.BooleanField(default=True, verbose_name='Активный')
@@ -192,6 +201,7 @@ class Customer(models.Model):
 
 
 class Notification(models.Model):
+    # Уведомление
 
     recipient = models.ForeignKey(Customer, on_delete=models.CASCADE, verbose_name='Получатель')
     text = models.TextField()
@@ -206,6 +216,7 @@ class Notification(models.Model):
 
 
 class ImageGallery(models.Model):
+    # Галерея изображений
 
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     object_id = models.PositiveIntegerField()
@@ -215,6 +226,9 @@ class ImageGallery(models.Model):
 
     def __str__(self):
         return f"Изображение для {self.content_object}"
+
+    def image_url(self):
+        return mark_safe(f'<img src="{self.image.url}" width="auto" height="200px"')
 
     class Meta:
         verbose_name = 'Галерея изображений'

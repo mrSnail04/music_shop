@@ -2,7 +2,7 @@
 class ImageUploadHelper:
 
     FIELD_TO_COMBINE_MAP = {
-        'default': {
+        'defaults': {
             'upload_postfix': 'uploads'
         },
         'Member': {
@@ -36,7 +36,7 @@ class ImageUploadHelper:
     @property
     def path(self):
         field_to_combine = getattr(self.instance, self.field_name_to_combine)
-        filename = '.'.join([field_to_combine, self.extension])
+        filename = ".".join([field_to_combine, self.extension])
         return f"images/{self.instance.__class__.__name__.lower()}{self.upload_postfix}/{field_to_combine}/{filename}"
 
 

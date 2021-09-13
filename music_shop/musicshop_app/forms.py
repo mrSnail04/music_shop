@@ -53,7 +53,7 @@ class RegistrationForm(forms.ModelForm):
         if domain in ['net', 'xyz']:
             raise forms.ValidationError(f'Регистрация для домена {domain} невозможна.')
         if User.objects.filter(email=email).exists():
-            raise forms.ValidationError('Пользователь с таким почтовымадресом уже зарегистрирован.')
+            raise forms.ValidationError('Пользователь с такой электронной почтой уже зарегистрирован.')
         return email
 
     def clean_username(self):
@@ -72,6 +72,3 @@ class RegistrationForm(forms.ModelForm):
     class Meta:
         model = User
         fields = ['username', 'password', 'confirm_password', 'first_name', 'last_name', 'address', 'phone', 'email']
-
-
-

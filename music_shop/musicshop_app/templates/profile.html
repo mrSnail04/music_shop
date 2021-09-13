@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+
+<div class="row" style="margin-bottom: 200px; margin-top: 160px;">
+    <div class="col-md-6 offset-md-3">
+        <h3>Логин: {{ request.user.username }}</h3>
+        {% if request.user.first_name %}
+            <h3>Имя: {{ request.user.first_name }}</h3>
+        {% endif %}
+        {% if request.user.last_name %}
+            <h3>Фамилия: {{ request.user.last_name }}</h3>
+        {% endif %}
+        <h3>E-mail: {{ request.user.email }}</h3>
+        {% if phone != '' and phone %}
+            <h3>Телефон: {{ phone }}</h3>
+        {% endif %}
+        {% if address != '' and address %}
+            <h3>Адрес: {{ address }}</h3>
+        {% endif %}
+    </div>
+</div>
+
+{% endblock content %}

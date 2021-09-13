@@ -1,8 +1,8 @@
 from django.shortcuts import render
 from django import views
-from django.contrib.auth import authenticate,login
+from django.contrib.auth import authenticate, login
 from django.http import HttpResponseRedirect
-from .models import Artist, Album,Customer
+from .models import Artist, Album, Customer
 from .forms import LoginForm, RegistrationForm
 
 
@@ -49,7 +49,7 @@ class LoginView(views.View):
         context = {
             'form': form
         }
-        return render(request, 'registration.html', context)
+        return render(request, 'login.html', context)
 
 
 class RegistrationView(views.View):
@@ -87,3 +87,19 @@ class RegistrationView(views.View):
             'form': form
         }
         return render(request, 'registration.html', context)
+
+
+class ProfileView(views.View):
+
+    def get(self, request, *args, **kwargs):
+
+        try:
+            phone = Customer.objects.get(user=request.user).phone
+            address = Customer.objects.get(user=request.user).address
+            date = {'address': address, 'phone': phone}
+            return render(request, 'profile.html', context=date)
+        except:
+            date = {}
+        finally:
+            return render(request, 'profile.html', context=date)
+

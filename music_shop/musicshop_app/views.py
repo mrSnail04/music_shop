@@ -2,7 +2,7 @@ from django.shortcuts import render
 from django import views
 from django.contrib.auth import authenticate, login
 from django.http import HttpResponseRedirect
-from .models import Artist, Album, Customer
+from .models import Artist, Album, Customer, Order, Cart
 from .forms import LoginForm, RegistrationForm
 
 
@@ -92,14 +92,13 @@ class RegistrationView(views.View):
 class ProfileView(views.View):
 
     def get(self, request, *args, **kwargs):
+        customer = Customer.objects.get(user=request.user)
+        orders = Order.objects.filter(customer=customer).order_by('-created_at')
+        cart = Cart.objects.filter(owner=customer, in_order=False).first()
 
-        try:
-            phone = Customer.objects.get(user=request.user).phone
-            address = Customer.objects.get(user=request.user).address
-            date = {'address': address, 'phone': phone}
-            return render(request, 'profile.html', context=date)
-        except:
-            date = {}
-        finally:
-            return render(request, 'profile.html', context=date)
+        return render(
+            request,
+            'profile.html',
+            {'orders': orders, 'cart': cart, 'customer': customer}
+        )
 

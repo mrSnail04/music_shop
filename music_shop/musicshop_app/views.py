@@ -1,15 +1,26 @@
 from django.shortcuts import render
 from django import views
+from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth import authenticate, login
 from django.http import HttpResponseRedirect
-from .models import Artist, Album, Customer, Order, Cart
+from .models import Artist, Album, Customer, Order, Cart, Genre, CartProduct
 from .forms import LoginForm, RegistrationForm
 
 
 class BaseView(views.View):
 
     def get(self, request, *args, **kwargs):
-        return render(request, 'base.html', {})
+
+        genres = Genre.objects.all()
+        albums = Album.objects.all()
+        artists = Artist.objects.all()
+
+        context = {
+            'genres': genres,
+            'albums': albums,
+            'artists': artists,
+        }
+        return render(request, 'base.html', context)
 
 
 class ArtistDetailView(views.generic.DeleteView):
@@ -102,3 +113,21 @@ class ProfileView(views.View):
             {'orders': orders, 'cart': cart, 'customer': customer}
         )
 
+
+class AddToCartView(views.View):
+
+    def get(self, request, *args, **kwargs):
+        customer = Customer.objects.get(user=request.user)
+        album_slug = kwargs.get('slug')
+        cart = Cart.objects.get(owner=customer, in_order=False)
+        content_type = ContentType.objects.get(model='album')
+        product = content_type.model_class().objects.get(slug=album_slug)
+        cart_product,  created = CartProduct.objects.get_or_create(
+            user=cart.owner, cart=cart, content_type=content_type, object_id = product.id, final_price=product.price
+        )
+
+        cart.products.add(cart_product)
+
+        # recalc_cart(cart)
+        # messages.add_message(request, messages.INFO, 'Товар успешно добавлен')
+        return HttpResponseRedirect('/profile/')
